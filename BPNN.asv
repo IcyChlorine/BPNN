@@ -65,26 +65,26 @@ costFunction = @(p) nnCostFunction(p, ...
 
 % 两个矩阵，拿出来
 
-unrolled_size=size(Theta1,1)*size(Theta1,2);
-Theta1 = reshape(nn_params(1:unrolled_size), hidden_layer_size_1, (input_layer_size + 1));
-nn_params=nn_params(1+unrolled_size:end);
+unrolled_size_1=size(Theta1,1)*size(Theta1,2);
+tmp=nn_params(1:unrolled_size_1);
+Theta1 = reshape(tmp, hidden_layer_size_1, (input_layer_size + 1));
 
-unrolled_size=size(Theta2,1)*size(Theta2,2);
-Theta2 = reshape(nn_params(1:unrolled_size), hidden_layer_size_2, (hidden_layer_size_1 + 1));
-nn_params=nn_params(1+unrolled_size:end);
+unrolled_size_2=size(Theta2,1)*size(Theta2,2);
+tmp=nn_params(1+unrolled_size_1 : unrolled_size_1+unrolled_size_2);
+Theta2 = reshape(tmp, hidden_layer_size_2, (hidden_layer_size_1 + 1));
 
-unrolled_size=size(Theta3,1)*size(Theta3,2);
-Theta3 = reshape(nn_params(1:unrolled_size), num_labels, (hidden_layer_size_2 + 1));
-%nn_params=nn_params(1+unrolled_size:end);
+unrolled_size_3=size(Theta3,1)*size(Theta3,2);
+Theta3 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
+                 num_labels, (hidden_layer_size_2 + 1));
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
 
 %% 检验模型（注意这里是拿训练的去检验）
-pred1 = predict(Theta1, Theta2, Theta3, Xtrain);
+pred1 = predict(Theta1, Theta2, Xtrain);
 
 fprintf('\nTraining Set Accuracy: %f\n', mean(double(pred1 == ytrain)) * 100);
 
 %% 检验模型（测试集）
-pred2 = predict(Theta1, Theta2, Theta3, X);
+pred2 = predict(Theta1, Theta2, X);
 fprintf('\nTest Set Accuracy: %f\n', mean(double(pred2 == y)) * 100);

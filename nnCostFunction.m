@@ -1,6 +1,7 @@
 function [J grad] = nnCostFunction(nn_params, ...
                                    input_layer_size, ...
-                                   hidden_layer_size, ...
+                                   hidden_layer_size_1, ...
+                                   hidden_layer_size_2, ...
                                    num_labels, ...
                                    X, y, lambda)
 %NNCOSTFUNCTION Implements the neural network cost function for a two layer
@@ -15,12 +16,18 @@ function [J grad] = nnCostFunction(nn_params, ...
 %
 
 % Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
-% for our 2 layer neural network
-Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
-                 hidden_layer_size, (input_layer_size + 1));
+% for our 4 layer neural network
+unrolled_size=size(Theta1,1)*size(Theta1,2);
+Theta1 = reshape(nn_params(1:unrolled_size), hidden_layer_size_1, (input_layer_size + 1));
+nn_params=nn_params(1+unrolled_size:end);
 
-Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
-                 num_labels, (hidden_layer_size + 1));
+unrolled_size=size(Theta2,1)*size(Theta2,2);
+Theta2 = reshape(nn_params(1:unrolled_size), hidden_layer_size_2, (hidden_layer_size_1 + 1));
+nn_params=nn_params(1+unrolled_size:end);
+
+unrolled_size=size(Theta3,1)*size(Theta3,2);
+Theta3 = reshape(nn_params(1:unrolled_size), num_labels, (hidden_layer_size_2 + 1));
+%nn_params=nn_params(1+unrolled_size:end);
 
 % Setup some useful variables
 m = size(X, 1);
@@ -29,6 +36,7 @@ m = size(X, 1);
 J = 0;
 Theta1_grad = zeros(size(Theta1));
 Theta2_grad = zeros(size(Theta2));
+Theta3_grad = zeros(size(Theta3));
 
 % ====================== YOUR CODE HERE ======================
 % Instructions: You should complete the code by working through the
@@ -63,11 +71,11 @@ Theta2_grad = zeros(size(Theta2));
 %
 
 a1 = [ones(1,m);X'];
-z_2 = Theta1 * a1;
-a2 = [ones(1,m) ; sigmoid(z_2)];
-z_2 = [ones(1,m);z_2];
-z_3 = Theta2 * a2;
-a3 = sigmoid(z_3); 
+z2 = Theta1 * a1;
+a2 = [ones(1,m) ; sigmoid(z2)];
+z2 = [ones(1,m);z2];
+z3 = Theta2 * a2;
+a3 = sigmoid(z3); 
 h = a3'; % (num_labels *  m)' = (m * num_labels)
 
 yk=zeros(size(y,1),num_labels);
@@ -75,13 +83,16 @@ for i=1:size(y,1)
     yk(i,:)=(1:num_labels)==y(i);
 end;
 J = -1/m * sum(sum(yk.*log(h)+(1-yk).*log(1-h)))...
-    + lambda / (2*m)*(sum(sum(Theta1(:,2:end).*Theta1(:,2:end)))+sum(sum(Theta2(:,2:end).*Theta2(:,2:end))));
+    + lambda / (2*m)*(sum(sum(Theta1(:,2:end).*Theta1(:,2:end)))
+                     +sum(sum(Theta2(:,2:end).*Theta2(:,2:end)))
+                     +sum(sum(Theta3(:,2:end).*Theta3(:,2:end)))
+);
 
-delta_3 = a3 - yk';
-delta_2 = (Theta2' * delta_3) .* sigmoidGradient(z_2);
-delta_2 = delta_2(2:end,:);
-Theta1_grad = delta_2 * a1';
-Theta2_grad = delta_3 * a2';
+delta3 = a3 - yk';
+delta2 = (Theta2' * delta3) .* sigmoidGradient(z2);
+delta2 = delta2(2:end,:);
+Theta1_grad = delta2 * a1';
+Theta2_grad = delta3 * a2';
 
 Theta1_grad(:,2:end) = Theta1_grad(:,2:end) + lambda * Theta1(:,2:end);
 Theta1_grad = Theta1_grad./m;

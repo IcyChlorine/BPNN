@@ -25,8 +25,9 @@ pause;
 
 fprintf('\nInitializing Neural Network Parameters ...\n')
 
-%Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size);
-%Theta2 = randInitializeWeights(hidden_layer_size, num_labels);
+Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size_1);
+Theta2 = randInitializeWeights(hidden_layer_size_1, hidden_layer_size_2);
+Theta3 = randInitializeWeights(hidden_layer_size_2, num_labels);
 
 % Unroll parameters
 %initial_nn_params = [initial_Theta1(:) ; initial_Theta2(:)];

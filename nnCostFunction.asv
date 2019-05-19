@@ -17,11 +17,7 @@ function [J grad] = nnCostFunction(nn_params, ...
 
 % Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
 % for our 4 layer neural network
-Theta1=zeros(hidden_layer_size_1,input_layer_size+1);
-Theta2=zeros(hidden_layer_size_2,hidden_layer_size_1+1);
-Theta3=zeros(num_labels,hidden_layer_size_2+1);
-
-unrolled_size=size(Theta1,1)*size(Theta1,2);
+unrolled_size=size(Theta1,1)*size(Theta1,2);\
 Theta1 = reshape(nn_params(1:unrolled_size), hidden_layer_size_1, (input_layer_size + 1));
 nn_params=nn_params(1+unrolled_size:end);
 
